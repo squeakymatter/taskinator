@@ -2,6 +2,7 @@ var taskIdCounter = 0;
 
 var formEl = document.querySelector("#task-form");
 var tasksToDoEl = document.querySelector("#tasks-to-do");
+var pageContentEl = document.querySelector("#page-content");
 
 var taskFormHandler = function(event) {
     event.preventDefault();
@@ -96,5 +97,58 @@ actionContainerEl.className = "task-actions";
 
 };
 
+//this function is called from taskButtonHandler
+var deleteTask = function(taskId) {
+    var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']"); //notice no space between .task-item and data-task-id. This means both properties must be on the same element. a space means look for the element with the [data-task-id] element somewhere inside a .task-item element
+    //code to actually delete the task
+    taskSelected.remove();
+};
+
+//this function creates editTask function that creates its own taskSelected variables based on provided taskId;
+var editTask = function(taskId) {
+    /// get task list item element
+    var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
+
+// get content from task name and type
+    var taskName = taskSelected.querySelector("h3.task-name").textContent;
+    var taskType = taskSelected.querySelector("span.task-type").textContent;
+    document.querySelector("input[name='task-name']").value = taskName;
+    document.querySelector("select[name='task-type']").value = taskType;
+    //If user clicks Edit button, it should change copy to Save Task.
+    document.querySelector("#save-task").textContent = "Save Task";
+    //This adds taskId to a data-task-id attribute on the form itself. Users won't see but we can use later on to save the corrected task
+    formEl.setAttribute("data-task-id", taskId);
+};
+
+
+
+// editing a task involves 2 actions:
+// 1) Load the task's current information into the form.
+// 2) On form submit, update the task element's content
+
+
+var taskButtonHandler = function(event) {
+  //event target reports the element on which the event occurs, in this case, the click event
+    console.log(event.target);
+    //get target element from event (click)
+    var targetEl = event.target;
+
+    //edit button was clicked.
+    if (targetEl.matches(".edit-btn")) {
+        var taskId = targetEl.getAttribute("data-task-id");
+        editTask(taskId);
+    }
+
+
+    //matches() method created specifically for checking iff element matches criteria. returns true or false
+    //this is  different from querySelector() method, which finds/returns an element
+    if (event.target.matches(".delete-btn")) {
+        console.log("you clicked a delete button!")
+        //get the element's task id to figure out which task Delete button belongs to
+        var taskId = event.target.getAttribute("data-task-id");
+        deleteTask(taskId);
+    }
+};
 
 formEl.addEventListener("submit", taskFormHandler);
+pageContentEl.addEventListener("click", taskButtonHandler);
